@@ -58,7 +58,8 @@ stages:
 
 ## Create a Service Bus Namespace, Queues and Topics with Subscriptions
 
-[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FDigitalInnovation%2Fcloudintegration-templates%2Fazure-pipelines%2Fservicebus%2Farm-templates%2Fsb.deploy.json%3Ftoken%3DAHLGVIQFTZKWSQZTQLTUBSLAF25RQ)
+[![Deploy To Azure](https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/1-CONTRIBUTION-GUIDE/images/deploytoazure.svg?sanitize=true)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fbkanda%2Fcloud-journey%2Fmaster%2Fazure%2F%2Fservicebus%2Farm-templates%2Fsb.deploy.json)
+
 
 
 For information about using this template, see [Create a Service Bus namespace using an ARM template](http://azure.microsoft.com/documentation/articles/service-bus-resource-manager-namespace/).
