@@ -1,0 +1,33 @@
+trigger:
+- none
+
+parameters:
+- name: RGName
+  displayName: Resource Group Name
+  type: string
+- name: location
+  displayName: Resource location
+  type: string
+  default: northeurope 
+
+stages:
+- stage: deployment
+  displayName: deploy ARM template for Service Bus
+  jobs:
+  - deployment: deployment
+    displayName: deploy ARM template for Service Bus
+    pool:
+      vmImage: ubuntu-latest
+    environment: deployment
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - task: AzureCLI@2
+            inputs:
+              azureSubscription: 'sb-sandbox'
+              scriptType: 'bash'
+              scriptLocation: 'scriptPath'
+              scriptPath: 'servicebus/arm-templates/deploy.sh'
+              arguments: '-g ${{ parameters.RGName }} -n Service-Bus -l ${{ parameters.location }}'

@@ -1,0 +1,26 @@
+namespace: xxx
+serviceaccount: xxxx
+image: bitnami/kubectl:1.16           # kubectl version > v1.15 provides a `rollout restart` sub-command that allows you to restart Pods in a Deployment.
+                                      # Note: Can be used with clusters older than v1.15, as it’s implemented in the client.
+deployment:
+  #- name: k8s-deployment             # Name of the deployment which is to be restarted.
+                                      # CronJob name would be "k8s-deployment-job"
+  #  schedule: "30 9,12,14 * * *"     # Takes a Cron string as schedule time of its jobs to be created and executed.
+                                      # Note: All CronJob schedule: times are based on the timezone of the master where the job is initiated.
+                                      # You can check timezone using: kubectl run -i --tty busybox --image=busybox --restart=Never -- date
+  #  successfulJobsHistoryLimit: 10   # Specifies how many completed jobs should be kept. By default, they are set to 3.
+  #  failedJobsHistoryLimit: 3        # Specifies how many failed jobs should be kept. By default, they are set to 1.
+  #  concurrencyPolicy: Forbid        # [Allow, Forbid, Replace]
+                                      # Allow: The cron job allows concurrently running jobs
+                                      # Forbid (default in the chart template): The cron job does not allow concurrent runs; if it is time for a new job run and the previous job run hasn't finished yet, the cron job skips the new job run
+                                      # Replace: If it is time for a new job run and the previous job run hasn't finished yet, the cron job replaces the currently running job run with a new job run
+  #  backoffLimit: 2                  # Number of retries before considering a Job as failed
+  #  activeDeadlineSeconds: 600       # Once a Job reaches activeDeadlineSeconds, all of its running Pods are terminated and the Job status will become type: Failed with reason: DeadlineExceeded.
+                                      # Makes most sense with "Waiting for deployment rollout to finish" command specified
+  #  restartPolicy: Never             # Pod's restartPolicy: [Never (default in the chart template), OnFailure]
+  - name:   # deployment Name
+    schedule: '35 20 * * *'     # At minute 35 past hour 20.
+    successfulJobsHistoryLimit: 10
+    failedJobsHistoryLimit: 3
+  - name:   # Deployment Name
+    schedule: "*/5 * * * *"           # At every 5th minute.

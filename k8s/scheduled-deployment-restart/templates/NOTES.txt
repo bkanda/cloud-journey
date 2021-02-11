@@ -1,0 +1,17 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+Your release version is {{ .Release.Revision }}
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get {{ .Release.Name }}
+
+To learn more about the jobs, try:
+
+  $ kubectl get cronjob
+  $ kubectl get job
+  $ pods=$(kubectl get pods --selector=job-name=<job_name> --output=jsonpath={.items[*].metadata.name})
+  $ kubectl logs $pods

@@ -1,0 +1,150 @@
+{
+    "$schema":"https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion":"1.0.0.0",
+    "parameters":{
+       "serviceBusNamespaceName":{
+          "type":"string",
+          "metadata":{
+             "description":"Name of the Service Bus namespace"
+          }
+       },
+       "serviceBusApiVersion":{
+          "type":"string",
+          "defaultValue":"2015-08-01",
+          "metadata":{
+             "description":"Service Bus ApiVersion used by the template"
+          }
+       },
+       "serviceBusSku":{
+          "type":"string",
+          "allowedValues":[
+             "Basic",
+             "Standard",
+             "Premium"
+          ],
+          "defaultValue":"Standard",
+          "metadata":{
+             "description":"The messaging tier for service Bus namespace"
+          }
+       },
+       "queues":{
+          "type":"array",
+          "metadata":{
+             "description":"a list of topics that will be created"
+          }
+       },
+       "topicList":{
+          "type":"array",
+          "metadata":{
+             "description":"a list of topics that will be created"
+          }
+       },
+       "subscriptions":{
+          "type":"array",
+          "metadata":{
+             "description":"a list of subscritpions to be deployed – these must be named for the topics provided above as topic/subscription"
+          }
+       }
+    },
+    "variables":{
+       "location":"[resourceGroup().location]",
+       "sbVersion":"[parameters('serviceBusApiVersion')]",
+       "defaultSASKeyName":"RootManageSharedAccessKey",
+       "authRuleResourceId":"[resourceId('Microsoft.ServiceBus/namespaces/authorizationRules', parameters('serviceBusNamespaceName'), variables('defaultSASKeyName'))]"
+    },
+    "resources":[
+       {
+          "apiVersion":"[variables('sbVersion')]",
+          "name":"[parameters('serviceBusNamespaceName')]",
+          "type":"Microsoft.ServiceBus/Namespaces",
+          "location":"[variables('location')]",
+          "sku":{
+             "name":"[parameters('serviceBusSku')]"
+          },
+          "properties":{
+             "mode":"incremental"
+          }
+       },
+       {
+          "apiVersion":"2017-04-01",
+          "name":"[concat(parameters('serviceBusNamespaceName'), '/', parameters('queues')[copyIndex()])]",
+          "type":"Microsoft.ServiceBus/Namespaces/queues",
+          "copy":{
+             "name":"queueloop",
+             "count":"[length(parameters('queues'))]"
+          },
+          "dependsOn":[
+             "[concat('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]"
+          ],
+          "properties":{
+             "lockDuration":"PT5M",
+             "maxSizeInMegabytes":"1024",
+             "requiresDuplicateDetection":"false",
+             "requiresSession":"false",
+             "defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S",
+             "deadLetteringOnMessageExpiration":"true",
+             "duplicateDetectionHistoryTimeWindow":"PT10M",
+             "maxDeliveryCount":"10",
+             "autoDeleteOnIdle":"P10675199DT2H48M5.4775807S",
+             "enablePartitioning":"false",
+             "enableExpress":"false"
+          }
+       },
+       {
+          "apiVersion":"[variables('sbVersion')]",
+          "name":"[concat(parameters('serviceBusNamespaceName'), '/', parameters('topicList')[copyIndex()])]",
+          "type":"Microsoft.ServiceBus/Namespaces/Topics",
+          "copy":{
+             "name":"topicCopy",
+             "count":"[length(parameters('topicList'))]"
+          },
+          "dependsOn":[
+             "[concat('Microsoft.ServiceBus/namespaces/', parameters('serviceBusNamespaceName'))]"
+          ],
+          "properties":{
+             "defaultMessageTimeToLive":"01:00:00",
+             "maxSizeInMegabytes":1024,
+             "requiresDuplicateDetection":false,
+             "enableBatchedOperations":true,
+             "filteringMessagesBeforePublishing":false,
+             "isAnonymousAccessible":false,
+             "supportOrdering":true,
+             "autoDeleteOnIdle":"14.00:00:00",
+             "enablePartitioning":false,
+             "enableExpress":false
+          }
+       },
+       {
+          "apiVersion":"[variables('sbVersion')]",
+          "name":"[concat(parameters('serviceBusNamespaceName'), '/', parameters('subscriptions')[copyIndex()].topic, '/', parameters('subscriptions')[copyIndex()].subscription)]",
+          "type":"Microsoft.ServiceBus/Namespaces/Topics/Subscriptions",
+          "copy":{
+             "name":"subsDeployment",
+             "count":"[length(parameters('subscriptions'))]"
+          },
+          "dependsOn":[
+             "topicCopy"
+          ],
+          "properties":{
+             "lockDuration":"00:01:00",
+             "requiresSession":false,
+             "defaultMessageTimeToLive":"01:00:00",
+             "deadLetteringOnMessageExpiration":false,
+             "deadLetteringOnFilterEvaluationExceptions":true,
+             "maxDeliveryCount":10,
+             "enableBatchedOperations":true,
+             "autoDeleteOnIdle":"14.00:00:00"
+          }
+       }
+    ],
+    "outputs":{
+       "NamespaceConnectionString":{
+          "type":"string",
+          "value":"[listkeys(variables('authRuleResourceId'), variables('sbVersion')).primaryConnectionString]"
+       },
+       "SharedAccessPolicyPrimaryKey":{
+          "type":"string",
+          "value":"[listkeys(variables('authRuleResourceId'), variables('sbVersion')).primaryKey]"
+       }
+    }
+ }

@@ -1,0 +1,7 @@
+apiVersion: v1
+name: scheduled-deployment-restart
+version: 1.0.0
+description: Helm chart for restarting Kuberentes deployments based on specified CRON schedule
+home: https://github.com/cloud-journey
+sources:
+  - https://github.com/cloud-journey

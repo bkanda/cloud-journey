@@ -1,0 +1,40 @@
+# This template is to create multiple CronJob based on deployments specified
+{{ range $deployment := .Values.deployment}}
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ $deployment.name }}-job
+  namespace: {{ $.Values.namespace }}
+spec:
+  successfulJobsHistoryLimit: {{ default 3 $deployment.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ default 3 $deployment.failedJobsHistoryLimit }}
+  concurrencyPolicy: {{ default "Forbid" $deployment.concurrencyPolicy }}
+  startingDeadlineSeconds: {{ default 20 $deployment.startingDeadlineSeconds }}
+  schedule: {{ $deployment.schedule | quote}}
+  jobTemplate:
+    spec:
+      backoffLimit: {{ default 2 $deployment.backoffLimit }}
+      activeDeadlineSeconds: {{ default 600 $deployment.activeDeadlineSeconds }}
+      template:
+        spec:
+          serviceAccountName: {{ $.Values.namespace }}
+          restartPolicy: {{ default "Never" $deployment.restartPolicy }}
+          containers:
+            - name: kubectl
+              image: {{ $.Values.image }}
+              command:
+               - bash
+               - -c
+               - >-
+                 date;
+                 kubectl rollout restart deployment/{{ $deployment.name }} &&
+                 kubectl rollout status deployment/{{ $deployment.name }}
+              resources:
+                limits:
+                  cpu: 100m
+                  memory: 256Mi
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+---
+{{ end }}
